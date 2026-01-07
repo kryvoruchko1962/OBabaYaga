@@ -50,47 +50,17 @@ document.querySelectorAll('[data-link]').forEach(element => {
   });
 });
 
-// Check Twitch stream status
-function checkStreamStatus() {
-  const channelName = 'obaba_yaga';
-  const clientId = '34eu7t2r5xt7dev6v1x8cimr2ajhxk'; // Pode ser deixado vazio para verificação básica
-  
-  // Verificação simples usando fetch da Twitch API
-  fetch(`https://api.twitch.tv/kraken/streams/${channelName}`, {
-    headers: {
-      'Client-ID': clientId,
-      'Accept': 'application/vnd.twitchtv.v5+json'
-    }
-  })
-  .then(response => response.json())
-  .then(data => {
-    const onlineState = document.getElementById('onlineState');
-    const offlineState = document.getElementById('offlineState');
-    
-    if (data.stream) {
-      // Stream está online
-      onlineState.style.display = 'block';
-      offlineState.style.display = 'none';
-    } else {
-      // Stream está offline
-      onlineState.style.display = 'none';
-      offlineState.style.display = 'block';
-    }
-  })
-  .catch(error => {
-    console.log('Erro ao verificar status:', error);
-    // Se houver erro, manter offline como padrão
-    document.getElementById('offlineState').style.display = 'block';
-    document.getElementById('onlineState').style.display = 'none';
-  });
-}
-
-// Verificar status ao carregar a página
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-  checkStreamStatus();
-  // Verificar a cada 30 segundos
-  setInterval(checkStreamStatus, 30000);
   updateActiveNavLink();
+  // Carregar o Twitch Embed Player
+  if (window.Twitch && window.Twitch.Embed) {
+    new window.Twitch.Embed('twitch-embed-container', {
+      channel: 'obaba_yaga',
+      width: '100%',
+      height: '500'
+    });
+  }
 });
 
 // Add scroll effect to navbar

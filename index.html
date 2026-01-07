@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://embed.twitch.tv/embed.js"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -62,15 +63,7 @@
 
                     <div class="stream-panel">
                         <div class="stream-placeholder" id="streamContainer">
-                            <div class="stream-online" id="onlineState" style="display: none;">
-                                <iframe 
-                                    src="https://twitch.tv/embed/obaba_yaga/chat?parent=localhost&parent=127.0.0.1" 
-                                    height="500" 
-                                    width="100%" 
-                                    frameborder="0"
-                                    style="border-radius: 1.5rem;">
-                                </iframe>
-                            </div>
+                            <div id="twitch-embed-container"></div>
                             <div class="stream-offline" id="offlineState">
                                 <div class="offline-indicator">
                                     <div class="offline-dot"></div>
