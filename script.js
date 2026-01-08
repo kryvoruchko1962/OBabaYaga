@@ -231,13 +231,24 @@ function initializeApp() {
   console.log('App inicializando...');
   console.log('Twitch disponível:', !!window.Twitch);
   
-  checkStreamStatus();
-  
-  // Recarregar o embed a cada 60 segundos para atualizar estado
-  setInterval(function() {
-    console.log('Atualizando status da stream...');
-    checkStreamStatus();
-  }, 60000);
+  // Esperar pelo Twitch API estar carregado
+  waitForTwitch();
   
   updateActiveNavLink();
+}
+
+function waitForTwitch() {
+  if (window.Twitch && window.Twitch.Embed) {
+    console.log('Twitch carregado!');
+    checkStreamStatus();
+    
+    // Recarregar o embed a cada 60 segundos para atualizar estado
+    setInterval(function() {
+      console.log('Atualizando status da stream...');
+      checkStreamStatus();
+    }, 60000);
+  } else {
+    console.log('Aguardando Twitch API...');
+    setTimeout(waitForTwitch, 100);
+  }
 }
