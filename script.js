@@ -1,3 +1,5 @@
+console.log('Script.js carregado!');
+
 // Cache DOM elements
 const navToggle = document.getElementById('navToggle');
 const navMenu = document.getElementById('navMenu');
@@ -202,7 +204,7 @@ function loadTwitchEmbed() {
     try {
       // Cria novo embed
       new window.Twitch.Embed('twitch-embed-container', {
-        channel: 'OBaba_Yaga',
+        channel: 'obaba_yaga',
         width: '100%',
         height: '500',
         layout: 'video'
