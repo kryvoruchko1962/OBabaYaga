@@ -156,34 +156,12 @@ window.addEventListener('scroll', updateActiveNavLink);
 function checkStreamStatus() {
   console.log('Verificando status da stream...');
   loadTwitchEmbed();
-  
-  // Verificar depois de 2 segundos se o embed carregou
-  setTimeout(detectStreamStatus, 2000);
 }
 
 // Detectar se a stream está ao vivo
 function detectStreamStatus() {
-  const container = document.getElementById('twitch-embed-container');
-  const offlineState = document.getElementById('offlineState');
-  const liveBadge = document.getElementById('liveBadge');
-  const liveText = document.getElementById('liveText');
-  
-  // Se o embed tem iframe, significa que carregou
-  const iframe = container.querySelector('iframe');
-  
-  if (iframe) {
-    console.log('Stream detectada como ATIVA');
-    // Stream está ao vivo
-    if (offlineState) offlineState.style.display = 'none';
-    if (liveBadge) liveBadge.classList.add('live-active');
-    if (liveText) liveText.textContent = 'AO VIVO';
-  } else {
-    console.log('Stream detectada como OFFLINE');
-    // Stream offline
-    if (offlineState) offlineState.style.display = 'flex';
-    if (liveBadge) liveBadge.classList.remove('live-active');
-    if (liveText) liveText.textContent = 'AO VIVO EM BREVE';
-  }
+  console.log('Detectando stream status...');
+  // O iframe mostra automaticamente offline/online, sem necessidade de detectar
 }
 
 // Carregar o embed do Twitch
@@ -210,13 +188,17 @@ function loadTwitchEmbed() {
         height: '500',
         layout: 'video'
       });
+      
+      // Esconder o painel offline
+      const offlineState = document.getElementById('offlineState');
+      if (offlineState) {
+        offlineState.style.display = 'none';
+      }
     } catch (e) {
       console.log('Erro ao criar embed:', e);
     }
   } else {
-    console.log('Twitch API não carregada, aguardando...');
-    // Tentar novamente em 500ms
-    setTimeout(loadTwitchEmbed, 500);
+    console.log('Twitch API não disponível, usando fallback iframe');
   }
 }
 
@@ -262,6 +244,7 @@ function waitForTwitch(timeout) {
 function loadTwitchFallback() {
   console.log('Carregando fallback iframe...');
   const container = document.getElementById('twitch-embed-container');
+  const offlineState = document.getElementById('offlineState');
   
   if (container) {
     container.innerHTML = `
@@ -272,5 +255,10 @@ function loadTwitchFallback() {
         allowfullscreen="">
       </iframe>
     `;
+    
+    // Esconder o painel offline
+    if (offlineState) {
+      offlineState.style.display = 'none';
+    }
   }
 }
