@@ -50,18 +50,7 @@ document.querySelectorAll('[data-link]').forEach(element => {
   });
 });
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-  updateActiveNavLink();
-  // Carregar o Twitch Embed Player
-  if (window.Twitch && window.Twitch.Embed) {
-    new window.Twitch.Embed('twitch-embed-container', {
-      channel: 'obaba_yaga',
-      width: '100%',
-      height: '500'
-    });
-  }
-});
+
 
 // Add scroll effect to navbar
 let lastScroll = 0;
