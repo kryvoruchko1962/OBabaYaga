@@ -152,33 +152,68 @@ window.addEventListener('scroll', updateActiveNavLink);
 
 // Check if stream is live - Método seguro sem credenciais
 function checkStreamStatus() {
-  // Tenta carregar o embed do Twitch
-  // O Twitch mostrará automaticamente se está online ou offline
   loadTwitchEmbed();
 }
 
 // Carregar o embed do Twitch
 function loadTwitchEmbed() {
   const container = document.getElementById('twitch-embed-container');
+  const offlineState = document.getElementById('offlineState');
+  const liveBadge = document.getElementById('liveBadge');
+  const liveText = document.getElementById('liveText');
   
   if (window.Twitch && window.Twitch.Embed) {
     // Limpa o container
     container.innerHTML = '';
     
-    // Cria novo embed
-    new window.Twitch.Embed('twitch-embed-container', {
-      channel: 'obaba_yaga',
-      width: '100%',
-      height: '500',
-      layout: 'video'
-    });
+    try {
+      // Cria novo embed
+      const embed = new window.Twitch.Embed('twitch-embed-container', {
+        channel: 'obaba_yaga',
+        width: '100%',
+        height: '500',
+        layout: 'video'
+      });
+      
+      // Quando o embed carrega, verificar se está ao vivo
+      embed.addEventListener(window.Twitch.Embed.VIDEO_READY, function() {
+        // Stream está ao vivo
+        if (offlineState) {
+          offlineState.style.display = 'none';
+        }
+        if (liveBadge) {
+          liveBadge.classList.add('live-active');
+        }
+        if (liveText) {
+          liveText.textContent = 'AO VIVO';
+        }
+      });
+    } catch (e) {
+      console.log('Erro ao carregar embed:', e);
+      // Se houver erro, mostrar offline
+      if (offlineState) {
+        offlineState.style.display = 'flex';
+      }
+      if (liveBadge) {
+        liveBadge.classList.remove('live-active');
+      }
+      if (liveText) {
+        liveText.textContent = 'AO VIVO EM BREVE';
+      }
+    }
   }
 }
 
 // Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+  initializeApp();
+}
+
+function initializeApp() {
   checkStreamStatus();
   // Recarregar o embed a cada 60 segundos para atualizar estado
   setInterval(checkStreamStatus, 60000);
   updateActiveNavLink();
-});
+}
