@@ -195,6 +195,7 @@ function loadTwitchEmbed() {
     return;
   }
   
+  // Verificar se Twitch está disponível, se não, esperar
   if (window.Twitch && window.Twitch.Embed) {
     // Limpa o container
     container.innerHTML = '';
@@ -213,7 +214,9 @@ function loadTwitchEmbed() {
       console.log('Erro ao criar embed:', e);
     }
   } else {
-    console.log('Twitch API não carregada');
+    console.log('Twitch API não carregada, aguardando...');
+    // Tentar novamente em 500ms
+    setTimeout(loadTwitchEmbed, 500);
   }
 }
 
