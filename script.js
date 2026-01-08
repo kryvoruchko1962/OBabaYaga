@@ -231,15 +231,18 @@ function initializeApp() {
   console.log('App inicializando...');
   console.log('Twitch disponível:', !!window.Twitch);
   
-  // Esperar pelo Twitch API estar carregado
-  waitForTwitch();
+  // Esperar pelo Twitch API estar carregado, com timeout de 5 segundos
+  waitForTwitch(5000);
   
   updateActiveNavLink();
 }
 
-function waitForTwitch() {
+let waitTimeout = null;
+
+function waitForTwitch(timeout) {
   if (window.Twitch && window.Twitch.Embed) {
     console.log('Twitch carregado!');
+    if (waitTimeout) clearTimeout(waitTimeout);
     checkStreamStatus();
     
     // Recarregar o embed a cada 60 segundos para atualizar estado
@@ -247,8 +250,27 @@ function waitForTwitch() {
       console.log('Atualizando status da stream...');
       checkStreamStatus();
     }, 60000);
+  } else if (timeout > 0) {
+    console.log('Aguardando Twitch API... (' + timeout + 'ms)');
+    waitTimeout = setTimeout(() => waitForTwitch(timeout - 100), 100);
   } else {
-    console.log('Aguardando Twitch API...');
-    setTimeout(waitForTwitch, 100);
+    console.log('Timeout: Twitch API não carregou. Usando fallback.');
+    loadTwitchFallback();
+  }
+}
+
+function loadTwitchFallback() {
+  console.log('Carregando fallback iframe...');
+  const container = document.getElementById('twitch-embed-container');
+  
+  if (container) {
+    container.innerHTML = `
+      <iframe
+        src="https://player.twitch.tv/?channel=obaba_yaga&parent=${window.location.hostname}"
+        height="500"
+        width="100%"
+        allowfullscreen="">
+      </iframe>
+    `;
   }
 }
