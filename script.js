@@ -149,21 +149,22 @@ function updateActiveNavLink() {
     }
   });
 }
-const streamPanel = document.querySelector('.stream-panel');
 
-const streamObserver = new IntersectionObserver(entries => {
-  if (entries[0].isIntersecting) {
-    loadTwitchEmbed();
-    streamObserver.disconnect();
-  }
-});
-
-streamObserver.observe(streamPanel);
 
 window.addEventListener('scroll', updateActiveNavLink);
 
 // Check if stream is live
 function checkStreamStatus() {
+  const streamPanel = document.querySelector('.stream-panel');
+
+  const streamObserver = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) {
+      loadTwitchEmbed();
+      streamObserver.disconnect();
+    }
+  });
+
+  streamObserver.observe(streamPanel);
   console.log('Verificando status da stream...');
   loadTwitchEmbed();
 }
@@ -176,6 +177,7 @@ function detectStreamStatus() {
 
 // Carregar o embed do Twitch
 function loadTwitchEmbed() {
+  
   const container = document.getElementById('twitch-embed-container');
   
   if (!container) {
