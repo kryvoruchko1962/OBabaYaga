@@ -202,7 +202,7 @@ function loadTwitchEmbed() {
     try {
       // Cria novo embed
       new window.Twitch.Embed('twitch-embed-container', {
-        channel: 'obaba_yaga',
+        channel: 'OBaba_Yaga',
         width: '100%',
         height: '500',
         layout: 'video'
