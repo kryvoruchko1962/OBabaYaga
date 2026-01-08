@@ -149,6 +149,16 @@ function updateActiveNavLink() {
     }
   });
 }
+const streamPanel = document.querySelector('.stream-panel');
+
+const streamObserver = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) {
+    loadTwitchEmbed();
+    streamObserver.disconnect();
+  }
+});
+
+streamObserver.observe(streamPanel);
 
 window.addEventListener('scroll', updateActiveNavLink);
 
