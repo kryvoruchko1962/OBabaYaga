@@ -496,9 +496,9 @@ body {
   border: 1px solid var(--border-color);
   background: rgba(24, 24, 27, 0.9);
   transition: all 0.3s;
-  display: flex;
-  flex-direction: column;
-  min-height: 550px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 400px;
 }
 
 .offer-card:hover {
@@ -508,7 +508,7 @@ body {
 }
 
 .offer-header {
-  height: 14rem;
+  height: 10rem;
   position: relative;
   overflow: hidden;
 }
@@ -560,10 +560,9 @@ body {
 }
 
 .offer-content {
-  padding: 2rem;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  height: 100%;
 }
 
 .offer-name {
@@ -575,13 +574,12 @@ body {
 .offer-description {
   color: var(--gray-text);
   font-size: 0.875rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   line-height: 1.5;
 }
 
 .offer-perks {
-  margin-bottom: 2rem;
-  flex-grow: 1;
+  margin-bottom: 0;
 }
 
 .perk-item {
@@ -615,6 +613,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
+  margin-top: 1rem;
   margin-bottom: 1rem;
 }
 
