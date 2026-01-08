@@ -150,57 +150,68 @@ function updateActiveNavLink() {
 
 window.addEventListener('scroll', updateActiveNavLink);
 
-// Check if stream is live - Método seguro sem credenciais
+// Check if stream is live
 function checkStreamStatus() {
+  console.log('Verificando status da stream...');
   loadTwitchEmbed();
+  
+  // Verificar depois de 2 segundos se o embed carregou
+  setTimeout(detectStreamStatus, 2000);
 }
 
-// Carregar o embed do Twitch
-function loadTwitchEmbed() {
+// Detectar se a stream está ao vivo
+function detectStreamStatus() {
   const container = document.getElementById('twitch-embed-container');
   const offlineState = document.getElementById('offlineState');
   const liveBadge = document.getElementById('liveBadge');
   const liveText = document.getElementById('liveText');
   
+  // Se o embed tem iframe, significa que carregou
+  const iframe = container.querySelector('iframe');
+  
+  if (iframe) {
+    console.log('Stream detectada como ATIVA');
+    // Stream está ao vivo
+    if (offlineState) offlineState.style.display = 'none';
+    if (liveBadge) liveBadge.classList.add('live-active');
+    if (liveText) liveText.textContent = 'AO VIVO';
+  } else {
+    console.log('Stream detectada como OFFLINE');
+    // Stream offline
+    if (offlineState) offlineState.style.display = 'flex';
+    if (liveBadge) liveBadge.classList.remove('live-active');
+    if (liveText) liveText.textContent = 'AO VIVO EM BREVE';
+  }
+}
+
+// Carregar o embed do Twitch
+function loadTwitchEmbed() {
+  const container = document.getElementById('twitch-embed-container');
+  
+  if (!container) {
+    console.log('Container não encontrado');
+    return;
+  }
+  
   if (window.Twitch && window.Twitch.Embed) {
     // Limpa o container
     container.innerHTML = '';
     
+    console.log('Carregando embed do Twitch...');
+    
     try {
       // Cria novo embed
-      const embed = new window.Twitch.Embed('twitch-embed-container', {
+      new window.Twitch.Embed('twitch-embed-container', {
         channel: 'obaba_yaga',
         width: '100%',
         height: '500',
         layout: 'video'
       });
-      
-      // Quando o embed carrega, verificar se está ao vivo
-      embed.addEventListener(window.Twitch.Embed.VIDEO_READY, function() {
-        // Stream está ao vivo
-        if (offlineState) {
-          offlineState.style.display = 'none';
-        }
-        if (liveBadge) {
-          liveBadge.classList.add('live-active');
-        }
-        if (liveText) {
-          liveText.textContent = 'AO VIVO';
-        }
-      });
     } catch (e) {
-      console.log('Erro ao carregar embed:', e);
-      // Se houver erro, mostrar offline
-      if (offlineState) {
-        offlineState.style.display = 'flex';
-      }
-      if (liveBadge) {
-        liveBadge.classList.remove('live-active');
-      }
-      if (liveText) {
-        liveText.textContent = 'AO VIVO EM BREVE';
-      }
+      console.log('Erro ao criar embed:', e);
     }
+  } else {
+    console.log('Twitch API não carregada');
   }
 }
 
@@ -212,8 +223,16 @@ if (document.readyState === 'loading') {
 }
 
 function initializeApp() {
+  console.log('App inicializando...');
+  console.log('Twitch disponível:', !!window.Twitch);
+  
   checkStreamStatus();
+  
   // Recarregar o embed a cada 60 segundos para atualizar estado
-  setInterval(checkStreamStatus, 60000);
+  setInterval(function() {
+    console.log('Atualizando status da stream...');
+    checkStreamStatus();
+  }, 60000);
+  
   updateActiveNavLink();
 }
