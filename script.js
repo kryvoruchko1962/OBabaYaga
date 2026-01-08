@@ -161,10 +161,35 @@ function updateActiveNavLink() {
 
 window.addEventListener('scroll', updateActiveNavLink);
 
+// Check if stream is live - Método seguro sem credenciais
+function checkStreamStatus() {
+  // Tenta carregar o embed do Twitch
+  // O Twitch mostrará automaticamente se está online ou offline
+  loadTwitchEmbed();
+}
+
+// Carregar o embed do Twitch
+function loadTwitchEmbed() {
+  const container = document.getElementById('twitch-embed-container');
+  
+  if (window.Twitch && window.Twitch.Embed) {
+    // Limpa o container
+    container.innerHTML = '';
+    
+    // Cria novo embed
+    new window.Twitch.Embed('twitch-embed-container', {
+      channel: 'obaba_yaga',
+      width: '100%',
+      height: '500',
+      layout: 'video'
+    });
+  }
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
   checkStreamStatus();
-  // Verificar a cada 30 segundos
-  setInterval(checkStreamStatus, 30000);
+  // Recarregar o embed a cada 60 segundos para atualizar estado
+  setInterval(checkStreamStatus, 60000);
   updateActiveNavLink();
 });

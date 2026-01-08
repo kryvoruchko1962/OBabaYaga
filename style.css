@@ -223,6 +223,14 @@ body {
   font-size: 0.875rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.live-badge.live-active {
+  background: rgba(220, 38, 38, 0.15);
+  border-color: rgba(220, 38, 38, 0.3);
+  color: #fca5a5;
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.3);
 }
 
 .live-dot {
