@@ -177,42 +177,42 @@ function detectStreamStatus() {
 
 // Carregar o embed do Twitch
 function loadTwitchEmbed() {
-  
   const container = document.getElementById('twitch-embed-container');
-  
-  if (!container) {
-    console.log('Container não encontrado');
-    return;
-  }
-  
-  // Verificar se Twitch está disponível, se não, esperar
+  const offlineState = document.getElementById('offlineState');
+  const loader = document.getElementById('streamLoader');
+
+  if (!container) return;
+
   if (window.Twitch && window.Twitch.Embed) {
-    // Limpa o container
     container.innerHTML = '';
-    
-    console.log('Carregando embed do Twitch...');
-    
     try {
-      // Cria novo embed
-      new window.Twitch.Embed('twitch-embed-container', {
+      const embed = new window.Twitch.Embed('twitch-embed-container', {
         channel: 'obaba_yaga',
         width: '100%',
         height: '100%',
-        layout: 'video'
+        layout: 'video',
       });
-      
+
       // Esconder o painel offline
-      const offlineState = document.getElementById('offlineState');
-      if (offlineState) {
-        offlineState.style.display = 'none';
-      }
+      if (offlineState) offlineState.style.display = 'none';
+
+      // Mostrar loader até a stream carregar
+      if (loader) loader.style.display = 'flex';
+
+      embed.addEventListener(Twitch.Embed.VIDEO_READY, () => {
+        // Stream carregou → esconder loader
+        if (loader) loader.style.display = 'none';
+      });
     } catch (e) {
       console.log('Erro ao criar embed:', e);
+      if (loader) loader.style.display = 'none';
     }
   } else {
     console.log('Twitch API não disponível, usando fallback iframe');
+    if (loader) loader.style.display = 'none';
   }
 }
+
 
 // Initialize on page load
 if (document.readyState === 'loading') {
