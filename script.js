@@ -1,5 +1,36 @@
 console.log('Script.js carregado!');
 
+// Age Gate functionality
+(function() {
+  const ageGate = document.getElementById('ageGate');
+  const ageConfirm = document.getElementById('ageConfirm');
+  const ageDeny = document.getElementById('ageDeny');
+  const STORAGE_KEY = 'obaba_age_verified';
+
+  // Check if already verified
+  if (localStorage.getItem(STORAGE_KEY) === 'true') {
+    ageGate.classList.add('hidden');
+    document.body.style.overflow = '';
+  } else {
+    document.body.style.overflow = 'hidden';
+  }
+
+  // Confirm age (18+)
+  ageConfirm.addEventListener('click', function() {
+    localStorage.setItem(STORAGE_KEY, 'true');
+    ageGate.style.animation = 'fadeOut 0.3s ease forwards';
+    setTimeout(() => {
+      ageGate.classList.add('hidden');
+      document.body.style.overflow = '';
+    }, 300);
+  });
+
+  // Deny (under 18)
+  ageDeny.addEventListener('click', function() {
+    window.location.href = 'https://www.youtube.com/watch?v=HjiSPhGthHI&list=RDHjiSPhGthHI&start_radio=1';
+  });
+})();
+
 // Cache DOM elements
 const navToggle = document.getElementById('navToggle');
 const navMenu = document.getElementById('navMenu');
@@ -55,12 +86,9 @@ document.querySelectorAll('[data-link]').forEach(element => {
 
 
 // Add scroll effect to navbar
-let lastScroll = 0;
-
 window.addEventListener('scroll', function() {
   const currentScroll = window.pageYOffset;
   navbar.style.boxShadow = currentScroll <= 0 ? 'none' : '0 4px 6px -1px rgba(0, 0, 0, 0.3)';
-  lastScroll = currentScroll;
 });
 
 // Intersection Observer for fade-in animations
@@ -93,12 +121,60 @@ function animateCounter(element, target, duration = 2000) {
   const timer = setInterval(() => {
     current += increment;
     if (current >= target) {
-      element.textContent = target + '+';
+      element.textContent = formatNumber(target);
       clearInterval(timer);
     } else {
-      element.textContent = Math.floor(current) + '+';
+      element.textContent = formatNumber(Math.floor(current));
     }
   }, 16);
+}
+
+// Format number with K/M suffix
+function formatNumber(num) {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+  }
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+  }
+  return num.toString();
+}
+
+// Fetch real-time follower count from Twitch using DecAPI
+function fetchFollowerCount() {
+  const followerElement = document.getElementById('followerCount');
+  
+  if (!followerElement) return;
+  
+  // Using DecAPI - a free API that provides Twitch stats
+  fetch('https://decapi.me/twitch/followcount/obaba_yaga')
+    .then(response => response.text())
+    .then(count => {
+      const followerCount = parseInt(count.trim());
+      
+      if (!isNaN(followerCount)) {
+        // Animate the counter
+        animateCounter(followerElement, followerCount, 2000);
+        console.log('Follower count fetched:', followerCount);
+      } else {
+        // Fallback if API returns non-number
+        followerElement.textContent = '1K+';
+        console.log('Could not parse follower count:', count);
+      }
+    })
+    .catch(err => {
+      console.log('Error fetching follower count:', err);
+      followerElement.textContent = '1K+';
+    });
+}
+
+// Update follower count periodically (every 5 minutes)
+function startFollowerUpdates() {
+  // Fetch immediately
+  fetchFollowerCount();
+  
+  // Then update every 5 minutes (300000ms)
+  setInterval(fetchFollowerCount, 300000);
 }
 
 // Observe stats section for counter animation
@@ -153,31 +229,16 @@ function updateActiveNavLink() {
 
 window.addEventListener('scroll', updateActiveNavLink);
 
-// Check if stream is live
+// Check if stream is live FIRST, then decide whether to load embed
 function checkStreamStatus() {
-  const streamPanel = document.querySelector('.stream-panel');
-
-  const streamObserver = new IntersectionObserver(entries => {
-    if (entries[0].isIntersecting) {
-      loadTwitchEmbed();
-      streamObserver.disconnect();
-    }
-  });
-
-  streamObserver.observe(streamPanel);
   console.log('Verificando status da stream...');
-  loadTwitchEmbed();
+  checkTwitchStreamStatus();
 }
 
-// Detectar se a stream está ao vivo
-function detectStreamStatus() {
-  console.log('Detectando stream status...');
-  // O iframe mostra automaticamente offline/online, sem necessidade de detectar
-}
+// Carregar o embed do Twitch (only called when stream is live)
+let twitchEmbed = null;
 
-// Carregar o embed do Twitch
 function loadTwitchEmbed() {
-  
   const container = document.getElementById('twitch-embed-container');
   
   if (!container) {
@@ -185,7 +246,11 @@ function loadTwitchEmbed() {
     return;
   }
   
-  // Verificar se Twitch está disponível, se não, esperar
+  // Get the correct parent for GitHub Pages
+  const hostname = window.location.hostname;
+  const parent = hostname === 'localhost' ? 'localhost' : hostname;
+  
+  // Verificar se Twitch está disponível
   if (window.Twitch && window.Twitch.Embed) {
     // Limpa o container
     container.innerHTML = '';
@@ -193,25 +258,146 @@ function loadTwitchEmbed() {
     console.log('Carregando embed do Twitch...');
     
     try {
-      // Cria novo embed
-      new window.Twitch.Embed('twitch-embed-container', {
+      // Cria novo embed with correct parent
+      twitchEmbed = new window.Twitch.Embed('twitch-embed-container', {
         channel: 'obaba_yaga',
         width: '100%',
         height: '100%',
-        layout: 'video'
+        layout: 'video',
+        parent: [parent]
       });
       
-      // Esconder o painel offline
-      const offlineState = document.getElementById('offlineState');
-      if (offlineState) {
-        offlineState.style.display = 'none';
-      }
+      console.log('Twitch embed criado com sucesso');
+      
     } catch (e) {
-      console.log('Erro ao criar embed:', e);
+      console.log('Erro ao criar embed, usando iframe fallback:', e);
+      loadTwitchIframe();
     }
   } else {
-    console.log('Twitch API não disponível, usando fallback iframe');
+    console.log('Twitch API não disponível, usando iframe');
+    loadTwitchIframe();
   }
+}
+
+// Load Twitch iframe directly (fallback)
+function loadTwitchIframe() {
+  const container = document.getElementById('twitch-embed-container');
+  const hostname = window.location.hostname;
+  const parent = hostname === 'localhost' ? 'localhost' : hostname;
+  
+  if (container) {
+    container.innerHTML = `
+      <iframe
+        src="https://player.twitch.tv/?channel=obaba_yaga&parent=${parent}"
+        height="100%"
+        width="100%"
+        allowfullscreen="">
+      </iframe>
+    `;
+  }
+}
+
+// Check stream status using DecAPI (works without API key, CORS-friendly)
+function checkTwitchStreamStatus() {
+  // DecAPI returns the game/category if live, or "username is offline" when not streaming
+  fetch('https://decapi.me/twitch/status/obaba_yaga')
+    .then(response => response.text())
+    .then(status => {
+      const statusText = status.trim();
+      console.log('Stream status from DecAPI:', statusText);
+      
+      // DecAPI returns "obaba_yaga is offline" when not streaming
+      // Only consider live if status does NOT contain "offline" and is not empty
+      const isOffline = statusText.toLowerCase().includes('offline') || 
+                        statusText === '' || 
+                        statusText.toLowerCase().includes('error');
+      
+      if (isOffline) {
+        console.log('Stream is OFFLINE - showing offline card only');
+        showOfflineCard();
+        // Clear the embed container when offline
+        const container = document.getElementById('twitch-embed-container');
+        if (container) {
+          container.innerHTML = '';
+        }
+      } else {
+        console.log('Stream is LIVE! Loading Twitch embed...');
+        // Only load embed when stream is confirmed live
+        loadTwitchScript().then(() => {
+          loadTwitchEmbed();
+          showStream();
+        });
+      }
+    })
+    .catch(err => {
+      console.log('Could not check stream status:', err);
+      // On error, keep showing offline card (safer default)
+      showOfflineCard();
+    });
+}
+
+// Load Twitch embed script dynamically only when needed
+function loadTwitchScript() {
+  return new Promise((resolve, reject) => {
+    if (window.Twitch && window.Twitch.Embed) {
+      resolve();
+      return;
+    }
+    
+    const script = document.createElement('script');
+    script.src = 'https://embed.twitch.tv/embed.js';
+    script.onload = () => {
+      console.log('Twitch script loaded');
+      resolve();
+    };
+    script.onerror = () => {
+      console.log('Failed to load Twitch script');
+      reject();
+    };
+    document.head.appendChild(script);
+  });
+}
+
+// Show the offline card overlay
+function showOfflineCard() {
+  const offlineCard = document.getElementById('offlineCard');
+  const liveBadge = document.getElementById('liveBadge');
+  const liveText = document.getElementById('liveText');
+  
+  if (offlineCard) {
+    offlineCard.classList.add('visible');
+  }
+  
+  if (liveBadge) {
+    liveBadge.classList.remove('live-active');
+  }
+  
+  if (liveText) {
+    liveText.textContent = 'OFFLINE';
+  }
+  
+  console.log('Showing offline card');
+}
+
+// Hide offline card and show stream
+function showStream() {
+  const offlineCard = document.getElementById('offlineCard');
+  const liveBadge = document.getElementById('liveBadge');
+  const liveText = document.getElementById('liveText');
+  
+  if (offlineCard) {
+    offlineCard.classList.remove('visible');
+  }
+  
+  if (liveBadge) {
+    liveBadge.classList.add('live-active');
+  }
+  
+  if (liveText) {
+    liveText.textContent = 'AO VIVO';
+  }
+  
+  console.log('Showing live stream');
 }
 
 // Initialize on page load
@@ -223,54 +409,21 @@ if (document.readyState === 'loading') {
 
 function initializeApp() {
   console.log('App inicializando...');
-  console.log('Twitch disponível:', !!window.Twitch);
   
-  // Esperar pelo Twitch API estar carregado, com timeout de 5 segundos
-  waitForTwitch(5000);
+  // Show offline card initially
+  showOfflineCard();
+  
+  // Start real-time follower count updates
+  startFollowerUpdates();
+  
+  // Check stream status immediately (don't wait for Twitch API)
+  checkStreamStatus();
+  
+  // Re-check stream status every 60 seconds
+  setInterval(function() {
+    console.log('Atualizando status da stream...');
+    checkStreamStatus();
+  }, 60000);
   
   updateActiveNavLink();
-}
-
-let waitTimeout = null;
-
-function waitForTwitch(timeout) {
-  if (window.Twitch && window.Twitch.Embed) {
-    console.log('Twitch carregado!');
-    if (waitTimeout) clearTimeout(waitTimeout);
-    checkStreamStatus();
-    
-    // Recarregar o embed a cada 60 segundos para atualizar estado
-    setInterval(function() {
-      console.log('Atualizando status da stream...');
-      checkStreamStatus();
-    }, 60000);
-  } else if (timeout > 0) {
-    console.log('Aguardando Twitch API... (' + timeout + 'ms)');
-    waitTimeout = setTimeout(() => waitForTwitch(timeout - 100), 100);
-  } else {
-    console.log('Timeout: Twitch API não carregou. Usando fallback.');
-    loadTwitchFallback();
-  }
-}
-
-function loadTwitchFallback() {
-  console.log('Carregando fallback iframe...');
-  const container = document.getElementById('twitch-embed-container');
-  const offlineState = document.getElementById('offlineState');
-  
-  if (container) {
-    container.innerHTML = `
-      <iframe
-        src="https://player.twitch.tv/?channel=obaba_yaga&parent=${window.location.hostname}"
-        height="500"
-        width="100%"
-        allowfullscreen="">
-      </iframe>
-    `;
-    
-    // Esconder o painel offline
-    if (offlineState) {
-      offlineState.style.display = 'none';
-    }
-  }
 }

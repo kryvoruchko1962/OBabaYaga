@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    <link rel="preconnect" href="https://player.twitch.tv">
-    <link rel="preconnect" href="https://embed.twitch.tv">
-    <link rel="preconnect" href="https://static.twitchcdn.net">
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OBABA_YAGA - Casino Streamer</title>
@@ -13,9 +9,25 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <script src="https://embed.twitch.tv/embed.js"></script>
 </head>
 <body>
+    <!-- Age Gate Modal -->
+    <div id="ageGate" class="age-gate">
+        <div class="age-gate-content">
+            <div class="age-gate-icon">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <h2 class="age-gate-title">Verificação de Idade</h2>
+            <p class="age-gate-text">Este site contém conteúdo relacionado a jogos de azar e é destinado apenas a maiores de 18 anos.</p>
+            <p class="age-gate-question">Confirmas que tens 18 anos ou mais?</p>
+            <div class="age-gate-buttons">
+                <button id="ageConfirm" class="age-btn age-btn-confirm">Sim, tenho +18</button>
+                <button id="ageDeny" class="age-btn age-btn-deny">Não, sou menor</button>
+            </div>
+            <p class="age-gate-warning"><i class="fas fa-exclamation-triangle"></i> Joga com responsabilidade</p>
+        </div>
+    </div>
+
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
@@ -68,14 +80,18 @@
                     <div class="stream-panel">
                         <div class="stream-placeholder" id="streamContainer">
                             <div id="twitch-embed-container"></div>
-                            <div class="stream-offline" id="offlineState">
-                                <div class="offline-indicator">
-                                    <div class="offline-dot"></div>
-                                    <span>Stream Offline</span>
+                            <!-- Offline Card Overlay -->
+                            <div class="offline-card" id="offlineCard">
+                                <img src="https://i.scdn.co/image/ab67616d0000b27347d8a992964dcf7fe8cc7947" alt="OBABA_YAGA Offline" class="offline-card-image">
+                                <div class="offline-card-content">
+                                    <div class="offline-indicator">
+                                        <div class="offline-dot"></div>
+                                        <span>Stream Offline</span>
+                                    </div>
+                                    <p class="offline-text">
+                                        A stream começa em breve. Segue-me na Twitch!
+                                    </p>
                                 </div>
-                                <p class="offline-text">
-                                    A stream começa em breve. Segue-me no Twitch para receberes notificação quando estiver ao vivo!
-                                </p>
                             </div>
                         </div>
                     </div>
@@ -91,7 +107,7 @@
                         <div class="stat-icon">
                             <i class="fas fa-users"></i>
                         </div>
-                        <div class="stat-value" data-target="1">1k+</div>
+                        <div class="stat-value" id="followerCount" data-target="1">--</div>
                         <div class="stat-label">Followers</div>
                     </div>
                     
