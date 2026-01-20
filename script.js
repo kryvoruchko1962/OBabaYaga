@@ -240,62 +240,46 @@ let twitchEmbed = null;
 
 function loadTwitchEmbed() {
   const container = document.getElementById('twitch-embed-container');
-  
-  if (!container) {
-    console.log('Container não encontrado');
-    return;
-  }
-  
-  // Get the correct parent for GitHub Pages
-  const hostname = window.location.hostname;
-  const parent = hostname === 'localhost' ? 'localhost' : hostname;
-  
-  // Verificar se Twitch está disponível
-  if (window.Twitch && window.Twitch.Embed) {
-    // Limpa o container
-    container.innerHTML = '';
-    
-    console.log('Carregando embed do Twitch...');
-    
-    try {
-      // Cria novo embed with correct parent
-      twitchEmbed = new window.Twitch.Embed('twitch-embed-container', {
-        channel: 'obaba_yaga',
-        width: '100%',
-        height: '100%',
-        layout: 'video',
-        parent: [parent]
-      });
-      
-      console.log('Twitch embed criado com sucesso');
-      
-    } catch (e) {
-      console.log('Erro ao criar embed, usando iframe fallback:', e);
-      loadTwitchIframe();
-    }
-  } else {
-    console.log('Twitch API não disponível, usando iframe');
+  if (!container) return;
+
+  const parent = window.location.hostname;
+
+  container.innerHTML = '';
+
+  try {
+    twitchEmbed = new Twitch.Embed('twitch-embed-container', {
+      channel: 'obaba_yaga',
+      width: '100%',
+      height: '100%',
+      parent: [parent]
+    });
+
+    console.log('Twitch embed criado com sucesso');
+  } catch (e) {
+    console.error('Erro no embed, usando iframe:', e);
     loadTwitchIframe();
   }
 }
 
+
 // Load Twitch iframe directly (fallback)
 function loadTwitchIframe() {
   const container = document.getElementById('twitch-embed-container');
-  const hostname = window.location.hostname;
-  const parent = hostname === 'localhost' ? 'localhost' : hostname;
-  
-  if (container) {
-    container.innerHTML = `
-      <iframe
-        src="https://player.twitch.tv/?channel=obaba_yaga&parent=${parent}"
-        height="100%"
-        width="100%"
-        allowfullscreen="">
-      </iframe>
-    `;
-  }
+  if (!container) return;
+
+  const parent = window.location.hostname;
+
+  container.innerHTML = `S
+    <iframe
+      src="https://player.twitch.tv/?channel=obaba_yaga&parent=${parent}"
+      height="100%"
+      width="100%"
+      frameborder="0"
+      allowfullscreen>
+    </iframe>
+  `;
 }
+
 
 // Check stream status using DecAPI (works without API key, CORS-friendly)
 function checkTwitchStreamStatus() {
